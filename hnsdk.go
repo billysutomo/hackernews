@@ -9,12 +9,12 @@ import (
 	"sync"
 )
 
-type hackernews struct {
+type Client struct {
 	hostname string
 }
 
-func HN() *hackernews {
-	return &hackernews{
+func NewClient() *Client {
+	return &Client{
 		hostname: "https://hacker-news.firebaseio.com",
 	}
 }
@@ -201,15 +201,15 @@ type User struct {
 	Submitted []int  `json:"submitted"`
 }
 
-func (hn hackernews) GetUser(ctx context.Context, username string) (User, error) {
+func (hn *Client) GetUser(ctx context.Context, username string) (User, error) {
 	return hn.apiV0GetUser(ctx, username)
 }
 
-func (hn hackernews) GetMaxItem(ctx context.Context) (int, error) {
+func (hn *Client) GetMaxItem(ctx context.Context) (int, error) {
 	return hn.apiV0GetMaxItem(ctx)
 }
 
-func (hn hackernews) GetStory(ctx context.Context, id int) (Story, error) {
+func (hn *Client) GetStory(ctx context.Context, id int) (Story, error) {
 	item, err := hn.apiV0GetItem(ctx, id)
 	if err != nil {
 		return Story{}, err
@@ -218,7 +218,7 @@ func (hn hackernews) GetStory(ctx context.Context, id int) (Story, error) {
 	return item.toStory(), nil
 }
 
-func (hn hackernews) GetComment(ctx context.Context, id int) (Comment, error) {
+func (hn *Client) GetComment(ctx context.Context, id int) (Comment, error) {
 	item, err := hn.apiV0GetItem(ctx, id)
 	if err != nil {
 		return Comment{}, err
@@ -227,7 +227,7 @@ func (hn hackernews) GetComment(ctx context.Context, id int) (Comment, error) {
 	return item.toComment(), nil
 }
 
-func (hn hackernews) GetAsk(ctx context.Context, id int) (Ask, error) {
+func (hn *Client) GetAsk(ctx context.Context, id int) (Ask, error) {
 	item, err := hn.apiV0GetItem(ctx, id)
 	if err != nil {
 		return Ask{}, err
@@ -236,7 +236,7 @@ func (hn hackernews) GetAsk(ctx context.Context, id int) (Ask, error) {
 	return item.toAsk(), nil
 }
 
-func (hn hackernews) GetJob(ctx context.Context, id int) (Job, error) {
+func (hn *Client) GetJob(ctx context.Context, id int) (Job, error) {
 	item, err := hn.apiV0GetItem(ctx, id)
 	if err != nil {
 		return Job{}, err
@@ -245,7 +245,7 @@ func (hn hackernews) GetJob(ctx context.Context, id int) (Job, error) {
 	return item.toJob(), nil
 }
 
-func (hn hackernews) GetPoll(ctx context.Context, id int) (Poll, error) {
+func (hn Client) GetPoll(ctx context.Context, id int) (Poll, error) {
 	item, err := hn.apiV0GetItem(ctx, id)
 	if err != nil {
 		return Poll{}, err
@@ -254,7 +254,7 @@ func (hn hackernews) GetPoll(ctx context.Context, id int) (Poll, error) {
 	return item.toPoll(), nil
 }
 
-func (hn hackernews) GetPollOpt(ctx context.Context, id int) (PollOpt, error) {
+func (hn *Client) GetPollOpt(ctx context.Context, id int) (PollOpt, error) {
 	item, err := hn.apiV0GetItem(ctx, id)
 	if err != nil {
 		return PollOpt{}, err
@@ -263,7 +263,7 @@ func (hn hackernews) GetPollOpt(ctx context.Context, id int) (PollOpt, error) {
 	return item.toPollOpt(), nil
 }
 
-func (hn hackernews) GetTopStories(ctx context.Context, number int) ([]int, error) {
+func (hn *Client) GetTopStories(ctx context.Context, number int) ([]int, error) {
 	if number < 1 || number > 500 {
 		return []int{}, fmt.Errorf("accept number between 1 and 500 only")
 	}
@@ -276,7 +276,7 @@ func (hn hackernews) GetTopStories(ctx context.Context, number int) ([]int, erro
 	return storyIDs[:number], nil
 }
 
-func (hn hackernews) GetTopStoriesWithData(ctx context.Context, number int) (Stories, error) {
+func (hn *Client) GetTopStoriesWithData(ctx context.Context, number int) (Stories, error) {
 	if number < 1 || number > 500 {
 		return Stories{}, fmt.Errorf("accept number between 1 and 500 only")
 	}
@@ -323,15 +323,15 @@ func (hn hackernews) GetTopStoriesWithData(ctx context.Context, number int) (Sto
 	return stories, err
 }
 
-func (hn hackernews) GetAskStories(ctx context.Context) ([]int, error) {
+func (hn *Client) GetAskStories(ctx context.Context) ([]int, error) {
 	return hn.apiV0GetAskStories(ctx)
 }
 
-func (hn hackernews) GetUpdates(ctx context.Context) (Updates, error) {
+func (hn *Client) GetUpdates(ctx context.Context) (Updates, error) {
 	return hn.apiV0GetUpdates(ctx)
 }
 
-func (hn hackernews) apiV0GetUser(ctx context.Context, username string) (User, error) {
+func (hn *Client) apiV0GetUser(ctx context.Context, username string) (User, error) {
 	u := User{}
 	bytes, err := hn.apiCall(ctx, fmt.Sprintf("/v0/user/%s.json", username))
 	if err != nil {
@@ -344,7 +344,7 @@ func (hn hackernews) apiV0GetUser(ctx context.Context, username string) (User, e
 	return u, nil
 }
 
-func (hn hackernews) apiV0GetItem(ctx context.Context, id int) (Item, error) {
+func (hn *Client) apiV0GetItem(ctx context.Context, id int) (Item, error) {
 	s := Item{}
 	bytes, err := hn.apiCall(ctx, fmt.Sprintf("/v0/item/%d.json", id))
 	if err != nil {
@@ -357,7 +357,7 @@ func (hn hackernews) apiV0GetItem(ctx context.Context, id int) (Item, error) {
 	return s, nil
 }
 
-func (hn hackernews) apiV0GetMaxItem(ctx context.Context) (int, error) {
+func (hn Client) apiV0GetMaxItem(ctx context.Context) (int, error) {
 	s := 0
 	bytes, err := hn.apiCall(ctx, "/v0/maxitem.json")
 	if err != nil {
@@ -372,7 +372,7 @@ func (hn hackernews) apiV0GetMaxItem(ctx context.Context) (int, error) {
 	return s, nil
 }
 
-func (hn hackernews) apiV0GetTopStories(ctx context.Context) ([]int, error) {
+func (hn *Client) apiV0GetTopStories(ctx context.Context) ([]int, error) {
 	s := []int{}
 	bytes, err := hn.apiCall(ctx, "/v0/topstories.json")
 	if err != nil {
@@ -387,7 +387,7 @@ func (hn hackernews) apiV0GetTopStories(ctx context.Context) ([]int, error) {
 	return s, nil
 }
 
-func (hn hackernews) apiV0GetAskStories(ctx context.Context) ([]int, error) {
+func (hn *Client) apiV0GetAskStories(ctx context.Context) ([]int, error) {
 	s := []int{}
 	bytes, err := hn.apiCall(ctx, "/v0/askstories.json")
 	if err != nil {
@@ -402,7 +402,7 @@ func (hn hackernews) apiV0GetAskStories(ctx context.Context) ([]int, error) {
 	return s, nil
 
 }
-func (hn hackernews) apiV0GetUpdates(ctx context.Context) (Updates, error) {
+func (hn *Client) apiV0GetUpdates(ctx context.Context) (Updates, error) {
 	u := Updates{}
 	bytes, err := hn.apiCall(ctx, "/v0/updates.json")
 	if err != nil {
@@ -417,7 +417,7 @@ func (hn hackernews) apiV0GetUpdates(ctx context.Context) (Updates, error) {
 	return u, nil
 }
 
-func (hn hackernews) apiCall(ctx context.Context, url string) ([]byte, error) {
+func (hn *Client) apiCall(ctx context.Context, url string) ([]byte, error) {
 	client := &http.Client{}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%s%s", hn.hostname, url), nil)
