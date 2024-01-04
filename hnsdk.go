@@ -201,14 +201,17 @@ type User struct {
 	Submitted []int  `json:"submitted"`
 }
 
+// Get user
 func (hn *Client) GetUser(ctx context.Context, username string) (User, error) {
 	return hn.apiV0GetUser(ctx, username)
 }
 
+// Get current largest item id . You can walk backward from here to discover all items.
 func (hn *Client) GetMaxItem(ctx context.Context) (int, error) {
 	return hn.apiV0GetMaxItem(ctx)
 }
 
+// Get story
 func (hn *Client) GetStory(ctx context.Context, id int) (Story, error) {
 	item, err := hn.apiV0GetItem(ctx, id)
 	if err != nil {
@@ -218,6 +221,7 @@ func (hn *Client) GetStory(ctx context.Context, id int) (Story, error) {
 	return item.toStory(), nil
 }
 
+// Get comment
 func (hn *Client) GetComment(ctx context.Context, id int) (Comment, error) {
 	item, err := hn.apiV0GetItem(ctx, id)
 	if err != nil {
@@ -227,6 +231,7 @@ func (hn *Client) GetComment(ctx context.Context, id int) (Comment, error) {
 	return item.toComment(), nil
 }
 
+// Get ask
 func (hn *Client) GetAsk(ctx context.Context, id int) (Ask, error) {
 	item, err := hn.apiV0GetItem(ctx, id)
 	if err != nil {
@@ -236,6 +241,7 @@ func (hn *Client) GetAsk(ctx context.Context, id int) (Ask, error) {
 	return item.toAsk(), nil
 }
 
+// Return Job
 func (hn *Client) GetJob(ctx context.Context, id int) (Job, error) {
 	item, err := hn.apiV0GetItem(ctx, id)
 	if err != nil {
@@ -245,6 +251,7 @@ func (hn *Client) GetJob(ctx context.Context, id int) (Job, error) {
 	return item.toJob(), nil
 }
 
+// Get poll
 func (hn Client) GetPoll(ctx context.Context, id int) (Poll, error) {
 	item, err := hn.apiV0GetItem(ctx, id)
 	if err != nil {
@@ -254,6 +261,7 @@ func (hn Client) GetPoll(ctx context.Context, id int) (Poll, error) {
 	return item.toPoll(), nil
 }
 
+// Get parts of poll
 func (hn *Client) GetPollOpt(ctx context.Context, id int) (PollOpt, error) {
 	item, err := hn.apiV0GetItem(ctx, id)
 	if err != nil {
@@ -263,6 +271,7 @@ func (hn *Client) GetPollOpt(ctx context.Context, id int) (PollOpt, error) {
 	return item.toPollOpt(), nil
 }
 
+// Get up to 500 top stories. ID only
 func (hn *Client) GetTopStories(ctx context.Context, number int) ([]int, error) {
 	if number < 1 || number > 500 {
 		return []int{}, fmt.Errorf("accept number between 1 and 500 only")
@@ -276,6 +285,7 @@ func (hn *Client) GetTopStories(ctx context.Context, number int) ([]int, error) 
 	return storyIDs[:number], nil
 }
 
+// Get up to 500 top stories. With data
 func (hn *Client) GetTopStoriesWithData(ctx context.Context, number int) (Stories, error) {
 	if number < 1 || number > 500 {
 		return Stories{}, fmt.Errorf("accept number between 1 and 500 only")
@@ -323,10 +333,12 @@ func (hn *Client) GetTopStoriesWithData(ctx context.Context, number int) (Storie
 	return stories, err
 }
 
+// Get up to 200 ask stories
 func (hn *Client) GetAskStories(ctx context.Context) ([]int, error) {
 	return hn.apiV0GetAskStories(ctx)
 }
 
+// Get item and profiles changes
 func (hn *Client) GetUpdates(ctx context.Context) (Updates, error) {
 	return hn.apiV0GetUpdates(ctx)
 }
