@@ -131,6 +131,17 @@ type Story struct {
 
 type Stories []Story
 
+type Items []Item
+
+func (i Items) toStories() Stories {
+	var stories Stories
+
+	for _, item := range i {
+		stories = append(stories, item.toStory())
+	}
+	return stories
+}
+
 type Comment struct {
 	By     string `json:"by"`
 	ID     int    `json:"id"`
@@ -296,12 +307,87 @@ func (hn *Client) GetTopStoriesWithData(ctx context.Context, number int) (Storie
 		return Stories{}, err
 	}
 
-	stories := make(Stories, number)
+	items, err := hn.getItems(ctx, storyIDs, number)
+	if err != nil {
+		return Stories{}, err
+	}
+
+	return items.toStories(), err
+}
+
+// Get up to 500 new stories. ID only
+func (hn *Client) GetNewStories(ctx context.Context, number int) ([]int, error) {
+	if number < 1 || number > 500 {
+		return []int{}, fmt.Errorf("accept number between 1 and 500 only")
+	}
+
+	storyIDs, err := hn.apiV0GetNewStories(ctx)
+	if err != nil {
+		return []int{}, err
+	}
+
+	return storyIDs[:number], nil
+}
+
+// Get up to 500 new stories. With data
+func (hn *Client) GetNewStoriesWithData(ctx context.Context, number int) (Stories, error) {
+	if number < 1 || number > 500 {
+		return Stories{}, fmt.Errorf("accept number between 1 and 500 only")
+	}
+
+	storyIDs, err := hn.apiV0GetNewStories(ctx)
+	if err != nil {
+		return Stories{}, err
+	}
+
+	items, err := hn.getItems(ctx, storyIDs, number)
+	if err != nil {
+		return Stories{}, err
+	}
+
+	return items.toStories(), err
+}
+
+// Get up to 500 best stories. ID only
+func (hn *Client) GetBestStories(ctx context.Context, number int) ([]int, error) {
+	if number < 1 || number > 500 {
+		return []int{}, fmt.Errorf("accept number between 1 and 500 only")
+	}
+
+	storyIDs, err := hn.apiV0GetBestStories(ctx)
+	if err != nil {
+		return []int{}, err
+	}
+
+	return storyIDs[:number], nil
+}
+
+// Get up to 500 best stories. With data
+func (hn *Client) GetBestStoriesWithData(ctx context.Context, number int) (Stories, error) {
+	if number < 1 || number > 500 {
+		return Stories{}, fmt.Errorf("accept number between 1 and 500 only")
+	}
+
+	storyIDs, err := hn.apiV0GetBestStories(ctx)
+	if err != nil {
+		return Stories{}, err
+	}
+
+	items, err := hn.getItems(ctx, storyIDs, number)
+	if err != nil {
+		return Stories{}, err
+	}
+
+	return items.toStories(), err
+}
+
+func (hn *Client) getItems(ctx context.Context, ids []int, number int) (items Items, err error) {
 	var mu sync.Mutex
 	var wg sync.WaitGroup
 	var errs []error
 
-	for i, id := range storyIDs[:number] {
+	items = make([]Item, len(ids[:number]))
+	for i, id := range ids[:number] {
 		wg.Add(1)
 		go func(i, id int, wg *sync.WaitGroup) {
 			defer wg.Done()
@@ -319,7 +405,7 @@ func (hn *Client) GetTopStoriesWithData(ctx context.Context, number int) (Storie
 
 				mu.Lock()
 				defer mu.Unlock()
-				stories[i] = item.toStory()
+				items[i] = item
 			}
 		}(i, id, &wg)
 	}
@@ -327,10 +413,9 @@ func (hn *Client) GetTopStoriesWithData(ctx context.Context, number int) (Storie
 	wg.Wait()
 
 	if len(errs) > 0 {
-		return stories, fmt.Errorf("encountered %d errors: %v", len(errs), errs)
+		return items, fmt.Errorf("encountered %d errors: %v", len(errs), errs)
 	}
-
-	return stories, err
+	return items, nil
 }
 
 // Get up to 200 ask stories
@@ -387,6 +472,36 @@ func (hn Client) apiV0GetMaxItem(ctx context.Context) (int, error) {
 func (hn *Client) apiV0GetTopStories(ctx context.Context) ([]int, error) {
 	s := []int{}
 	bytes, err := hn.apiCall(ctx, "/v0/topstories.json")
+	if err != nil {
+		return s, err
+	}
+
+	err = json.Unmarshal(bytes, &s)
+	if err != nil {
+		return nil, err
+	}
+
+	return s, nil
+}
+
+func (hn *Client) apiV0GetNewStories(ctx context.Context) ([]int, error) {
+	s := []int{}
+	bytes, err := hn.apiCall(ctx, "/v0/newstories.json")
+	if err != nil {
+		return s, err
+	}
+
+	err = json.Unmarshal(bytes, &s)
+	if err != nil {
+		return nil, err
+	}
+
+	return s, nil
+}
+
+func (hn *Client) apiV0GetBestStories(ctx context.Context) ([]int, error) {
+	s := []int{}
+	bytes, err := hn.apiCall(ctx, "/v0/beststories.json")
 	if err != nil {
 		return s, err
 	}
