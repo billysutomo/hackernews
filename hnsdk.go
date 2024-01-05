@@ -59,22 +59,22 @@ func (c *Client) GetItem(ctx context.Context, id int) (Item, error) {
 }
 
 // Get user
-func (hn *Client) GetUser(ctx context.Context, username string) (User, error) {
-	return hn.apiV0GetUser(ctx, username)
+func (c *Client) GetUser(ctx context.Context, username string) (User, error) {
+	return c.apiV0GetUser(ctx, username)
 }
 
 // Get current largest item id . You can walk backward from here to discover all items.
-func (hn *Client) GetMaxItem(ctx context.Context) (int, error) {
-	return hn.apiV0GetMaxItem(ctx)
+func (c *Client) GetMaxItem(ctx context.Context) (int, error) {
+	return c.apiV0GetMaxItem(ctx)
 }
 
 // Get up to 500 top stories. ID only
-func (hn *Client) GetTopStories(ctx context.Context, number int) ([]int, error) {
+func (c *Client) GetTopStories(ctx context.Context, number int) ([]int, error) {
 	if number < 1 || number > 500 {
 		return []int{}, fmt.Errorf("accept number between 1 and 500 only")
 	}
 
-	storyIDs, err := hn.apiV0GetTopStories(ctx)
+	storyIDs, err := c.apiV0GetTopStories(ctx)
 	if err != nil {
 		return []int{}, err
 	}
@@ -83,17 +83,17 @@ func (hn *Client) GetTopStories(ctx context.Context, number int) ([]int, error) 
 }
 
 // Get up to 500 top stories. With data
-func (hn *Client) GetTopStoriesWithData(ctx context.Context, number int) (Items, error) {
+func (c *Client) GetTopStoriesWithData(ctx context.Context, number int) (Items, error) {
 	if number < 1 || number > 500 {
 		return Items{}, fmt.Errorf("accept number between 1 and 500 only")
 	}
 
-	storyIDs, err := hn.apiV0GetTopStories(ctx)
+	storyIDs, err := c.apiV0GetTopStories(ctx)
 	if err != nil {
 		return Items{}, err
 	}
 
-	items, err := hn.getItems(ctx, storyIDs, number)
+	items, err := c.getItems(ctx, storyIDs, number)
 	if err != nil {
 		return Items{}, err
 	}
@@ -102,12 +102,12 @@ func (hn *Client) GetTopStoriesWithData(ctx context.Context, number int) (Items,
 }
 
 // Get up to 500 new stories. ID only
-func (hn *Client) GetNewStories(ctx context.Context, number int) ([]int, error) {
+func (c *Client) GetNewStories(ctx context.Context, number int) ([]int, error) {
 	if number < 1 || number > 500 {
 		return []int{}, fmt.Errorf("accept number between 1 and 500 only")
 	}
 
-	storyIDs, err := hn.apiV0GetNewStories(ctx)
+	storyIDs, err := c.apiV0GetNewStories(ctx)
 	if err != nil {
 		return []int{}, err
 	}
@@ -116,17 +116,17 @@ func (hn *Client) GetNewStories(ctx context.Context, number int) ([]int, error) 
 }
 
 // Get up to 500 new stories. With data
-func (hn *Client) GetNewStoriesWithData(ctx context.Context, number int) (Items, error) {
+func (c *Client) GetNewStoriesWithData(ctx context.Context, number int) (Items, error) {
 	if number < 1 || number > 500 {
 		return Items{}, fmt.Errorf("accept number between 1 and 500 only")
 	}
 
-	storyIDs, err := hn.apiV0GetNewStories(ctx)
+	storyIDs, err := c.apiV0GetNewStories(ctx)
 	if err != nil {
 		return Items{}, err
 	}
 
-	items, err := hn.getItems(ctx, storyIDs, number)
+	items, err := c.getItems(ctx, storyIDs, number)
 	if err != nil {
 		return Items{}, err
 	}
@@ -135,12 +135,12 @@ func (hn *Client) GetNewStoriesWithData(ctx context.Context, number int) (Items,
 }
 
 // Get up to 500 best stories. ID only
-func (hn *Client) GetBestStories(ctx context.Context, number int) ([]int, error) {
+func (c *Client) GetBestStories(ctx context.Context, number int) ([]int, error) {
 	if number < 1 || number > 500 {
 		return []int{}, fmt.Errorf("accept number between 1 and 500 only")
 	}
 
-	storyIDs, err := hn.apiV0GetBestStories(ctx)
+	storyIDs, err := c.apiV0GetBestStories(ctx)
 	if err != nil {
 		return []int{}, err
 	}
@@ -149,17 +149,17 @@ func (hn *Client) GetBestStories(ctx context.Context, number int) ([]int, error)
 }
 
 // Get up to 500 best stories. With data
-func (hn *Client) GetBestStoriesWithData(ctx context.Context, number int) (Items, error) {
+func (c *Client) GetBestStoriesWithData(ctx context.Context, number int) (Items, error) {
 	if number < 1 || number > 500 {
 		return Items{}, fmt.Errorf("accept number between 1 and 500 only")
 	}
 
-	storyIDs, err := hn.apiV0GetBestStories(ctx)
+	storyIDs, err := c.apiV0GetBestStories(ctx)
 	if err != nil {
 		return Items{}, err
 	}
 
-	items, err := hn.getItems(ctx, storyIDs, number)
+	items, err := c.getItems(ctx, storyIDs, number)
 	if err != nil {
 		return Items{}, err
 	}
@@ -167,7 +167,7 @@ func (hn *Client) GetBestStoriesWithData(ctx context.Context, number int) (Items
 	return items, err
 }
 
-func (hn *Client) getItems(ctx context.Context, ids []int, number int) (items Items, err error) {
+func (c *Client) getItems(ctx context.Context, ids []int, number int) (items Items, err error) {
 	var mu sync.Mutex
 	var wg sync.WaitGroup
 	var errs []error
@@ -183,7 +183,7 @@ func (hn *Client) getItems(ctx context.Context, ids []int, number int) (items It
 				errs = append(errs, ctx.Err())
 				return
 			default:
-				item, err := hn.apiV0GetItem(ctx, id)
+				item, err := c.apiV0GetItem(ctx, id)
 				if err != nil {
 					errs = append(errs, fmt.Errorf("failed to fetch item %d: %v", id, err))
 					return
@@ -205,22 +205,22 @@ func (hn *Client) getItems(ctx context.Context, ids []int, number int) (items It
 }
 
 // Get up to 200 ask stories. ID only
-func (hn *Client) GetAskStories(ctx context.Context) ([]int, error) {
-	return hn.apiV0GetAskStories(ctx)
+func (c *Client) GetAskStories(ctx context.Context) ([]int, error) {
+	return c.apiV0GetAskStories(ctx)
 }
 
 // Get up to 200 ask stories. With data
-func (hn *Client) GetAskStoriesWithData(ctx context.Context, number int) (Items, error) {
+func (c *Client) GetAskStoriesWithData(ctx context.Context, number int) (Items, error) {
 	if number < 1 || number > 200 {
 		return Items{}, fmt.Errorf("accept number between 1 and 200 only")
 	}
 
-	ids, err := hn.apiV0GetAskStories(ctx)
+	ids, err := c.apiV0GetAskStories(ctx)
 	if err != nil {
 		return Items{}, err
 	}
 
-	items, err := hn.getItems(ctx, ids, number)
+	items, err := c.getItems(ctx, ids, number)
 	if err != nil {
 		return Items{}, err
 	}
@@ -229,22 +229,22 @@ func (hn *Client) GetAskStoriesWithData(ctx context.Context, number int) (Items,
 }
 
 // Get up to 200 show stories. ID only
-func (hn *Client) GetShowStories(ctx context.Context) ([]int, error) {
-	return hn.apiV0GetShowStories(ctx)
+func (c *Client) GetShowStories(ctx context.Context) ([]int, error) {
+	return c.apiV0GetShowStories(ctx)
 }
 
 // Get up to 200 show stories. With data
-func (hn *Client) GetShowStoriesWithData(ctx context.Context, number int) (Items, error) {
+func (c *Client) GetShowStoriesWithData(ctx context.Context, number int) (Items, error) {
 	if number < 1 || number > 200 {
 		return Items{}, fmt.Errorf("accept number between 1 and 200 only")
 	}
 
-	ids, err := hn.apiV0GetShowStories(ctx)
+	ids, err := c.apiV0GetShowStories(ctx)
 	if err != nil {
 		return Items{}, err
 	}
 
-	items, err := hn.getItems(ctx, ids, number)
+	items, err := c.getItems(ctx, ids, number)
 	if err != nil {
 		return Items{}, err
 	}
@@ -253,22 +253,22 @@ func (hn *Client) GetShowStoriesWithData(ctx context.Context, number int) (Items
 }
 
 // Get up to 200 job stories. ID only
-func (hn *Client) GetJobStories(ctx context.Context) ([]int, error) {
-	return hn.apiV0GetJobStories(ctx)
+func (c *Client) GetJobStories(ctx context.Context) ([]int, error) {
+	return c.apiV0GetJobStories(ctx)
 }
 
 // Get up to 200 job stories. With data
-func (hn *Client) GetJobStoriesWithData(ctx context.Context, number int) (Items, error) {
+func (c *Client) GetJobStoriesWithData(ctx context.Context, number int) (Items, error) {
 	if number < 1 || number > 200 {
 		return Items{}, fmt.Errorf("accept number between 1 and 200 only")
 	}
 
-	ids, err := hn.apiV0GetJobStories(ctx)
+	ids, err := c.apiV0GetJobStories(ctx)
 	if err != nil {
 		return Items{}, err
 	}
 
-	items, err := hn.getItems(ctx, ids, number)
+	items, err := c.getItems(ctx, ids, number)
 	if err != nil {
 		return Items{}, err
 	}
@@ -277,13 +277,13 @@ func (hn *Client) GetJobStoriesWithData(ctx context.Context, number int) (Items,
 }
 
 // Get item and profiles changes
-func (hn *Client) GetUpdates(ctx context.Context) (Updates, error) {
-	return hn.apiV0GetUpdates(ctx)
+func (c *Client) GetUpdates(ctx context.Context) (Updates, error) {
+	return c.apiV0GetUpdates(ctx)
 }
 
-func (hn *Client) apiV0GetUser(ctx context.Context, username string) (User, error) {
+func (c *Client) apiV0GetUser(ctx context.Context, username string) (User, error) {
 	u := User{}
-	bytes, err := hn.apiCall(ctx, fmt.Sprintf("/v0/user/%s.json", username))
+	bytes, err := c.apiCall(ctx, fmt.Sprintf("/v0/user/%s.json", username))
 	if err != nil {
 		return User{}, err
 	}
@@ -294,9 +294,9 @@ func (hn *Client) apiV0GetUser(ctx context.Context, username string) (User, erro
 	return u, nil
 }
 
-func (hn *Client) apiV0GetItem(ctx context.Context, id int) (Item, error) {
+func (c *Client) apiV0GetItem(ctx context.Context, id int) (Item, error) {
 	s := Item{}
-	bytes, err := hn.apiCall(ctx, fmt.Sprintf("/v0/item/%d.json", id))
+	bytes, err := c.apiCall(ctx, fmt.Sprintf("/v0/item/%d.json", id))
 	if err != nil {
 		return Item{}, err
 	}
@@ -307,9 +307,9 @@ func (hn *Client) apiV0GetItem(ctx context.Context, id int) (Item, error) {
 	return s, nil
 }
 
-func (hn Client) apiV0GetMaxItem(ctx context.Context) (int, error) {
+func (c *Client) apiV0GetMaxItem(ctx context.Context) (int, error) {
 	s := 0
-	bytes, err := hn.apiCall(ctx, "/v0/maxitem.json")
+	bytes, err := c.apiCall(ctx, "/v0/maxitem.json")
 	if err != nil {
 		return s, err
 	}
@@ -322,9 +322,9 @@ func (hn Client) apiV0GetMaxItem(ctx context.Context) (int, error) {
 	return s, nil
 }
 
-func (hn *Client) apiV0GetTopStories(ctx context.Context) ([]int, error) {
+func (c *Client) apiV0GetTopStories(ctx context.Context) ([]int, error) {
 	s := []int{}
-	bytes, err := hn.apiCall(ctx, "/v0/topstories.json")
+	bytes, err := c.apiCall(ctx, "/v0/topstories.json")
 	if err != nil {
 		return s, err
 	}
@@ -337,9 +337,9 @@ func (hn *Client) apiV0GetTopStories(ctx context.Context) ([]int, error) {
 	return s, nil
 }
 
-func (hn *Client) apiV0GetNewStories(ctx context.Context) ([]int, error) {
+func (c *Client) apiV0GetNewStories(ctx context.Context) ([]int, error) {
 	s := []int{}
-	bytes, err := hn.apiCall(ctx, "/v0/newstories.json")
+	bytes, err := c.apiCall(ctx, "/v0/newstories.json")
 	if err != nil {
 		return s, err
 	}
@@ -352,9 +352,9 @@ func (hn *Client) apiV0GetNewStories(ctx context.Context) ([]int, error) {
 	return s, nil
 }
 
-func (hn *Client) apiV0GetBestStories(ctx context.Context) ([]int, error) {
+func (c *Client) apiV0GetBestStories(ctx context.Context) ([]int, error) {
 	s := []int{}
-	bytes, err := hn.apiCall(ctx, "/v0/beststories.json")
+	bytes, err := c.apiCall(ctx, "/v0/beststories.json")
 	if err != nil {
 		return s, err
 	}
@@ -367,9 +367,9 @@ func (hn *Client) apiV0GetBestStories(ctx context.Context) ([]int, error) {
 	return s, nil
 }
 
-func (hn *Client) apiV0GetAskStories(ctx context.Context) ([]int, error) {
+func (c *Client) apiV0GetAskStories(ctx context.Context) ([]int, error) {
 	s := []int{}
-	bytes, err := hn.apiCall(ctx, "/v0/askstories.json")
+	bytes, err := c.apiCall(ctx, "/v0/askstories.json")
 	if err != nil {
 		return s, err
 	}
@@ -382,9 +382,9 @@ func (hn *Client) apiV0GetAskStories(ctx context.Context) ([]int, error) {
 	return s, nil
 }
 
-func (hn *Client) apiV0GetShowStories(ctx context.Context) ([]int, error) {
+func (c *Client) apiV0GetShowStories(ctx context.Context) ([]int, error) {
 	s := []int{}
-	bytes, err := hn.apiCall(ctx, "/v0/showstories.json")
+	bytes, err := c.apiCall(ctx, "/v0/showstories.json")
 	if err != nil {
 		return s, err
 	}
@@ -397,9 +397,9 @@ func (hn *Client) apiV0GetShowStories(ctx context.Context) ([]int, error) {
 	return s, nil
 }
 
-func (hn *Client) apiV0GetJobStories(ctx context.Context) ([]int, error) {
+func (c *Client) apiV0GetJobStories(ctx context.Context) ([]int, error) {
 	s := []int{}
-	bytes, err := hn.apiCall(ctx, "/v0/jobstories.json")
+	bytes, err := c.apiCall(ctx, "/v0/jobstories.json")
 	if err != nil {
 		return s, err
 	}
@@ -412,9 +412,9 @@ func (hn *Client) apiV0GetJobStories(ctx context.Context) ([]int, error) {
 	return s, nil
 }
 
-func (hn *Client) apiV0GetUpdates(ctx context.Context) (Updates, error) {
+func (c *Client) apiV0GetUpdates(ctx context.Context) (Updates, error) {
 	u := Updates{}
-	bytes, err := hn.apiCall(ctx, "/v0/updates.json")
+	bytes, err := c.apiCall(ctx, "/v0/updates.json")
 	if err != nil {
 		return u, err
 	}
@@ -427,10 +427,10 @@ func (hn *Client) apiV0GetUpdates(ctx context.Context) (Updates, error) {
 	return u, nil
 }
 
-func (hn *Client) apiCall(ctx context.Context, url string) ([]byte, error) {
+func (c *Client) apiCall(ctx context.Context, url string) ([]byte, error) {
 	client := &http.Client{}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%s%s", hn.hostname, url), nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%s%s", c.hostname, url), nil)
 	if err != nil {
 		return nil, err
 	}
