@@ -37,166 +37,7 @@ type Item struct {
 	Descendants int    `json:"descendants"`
 }
 
-func (i Item) toStory() Story {
-	return Story{
-		By:          i.By,
-		Descendants: i.Descendants,
-		ID:          i.ID,
-		Kids:        i.Kids,
-		Score:       i.Score,
-		Time:        i.Time,
-		Title:       i.Title,
-		Type:        i.Type,
-		URL:         i.Url,
-	}
-}
-
-func (i Item) toComment() Comment {
-	return Comment{
-		By:     i.By,
-		ID:     i.ID,
-		Kids:   i.Kids,
-		Parent: i.Parent,
-		Text:   i.Text,
-		Time:   i.Time,
-		Type:   i.Type,
-	}
-}
-
-func (i Item) toAsk() Ask {
-	return Ask{
-		By:          i.By,
-		Descendants: i.Descendants,
-		ID:          i.ID,
-		Kids:        i.Kids,
-		Score:       i.Score,
-		Text:        i.Text,
-		Time:        i.Time,
-		Title:       i.Title,
-		Type:        i.Type,
-	}
-}
-
-func (i Item) toJob() Job {
-	return Job{
-		By:    i.By,
-		ID:    i.ID,
-		Score: i.Score,
-		Text:  i.Text,
-		Time:  i.Time,
-		Title: i.Title,
-		Type:  i.Type,
-		URL:   i.Url,
-	}
-}
-
-func (i Item) toPoll() Poll {
-	return Poll{
-		By:          i.By,
-		Descendants: i.Descendants,
-		ID:          i.ID,
-		Kids:        i.Kids,
-		Parts:       i.Parts,
-		Score:       i.Score,
-		Text:        i.Text,
-		Time:        i.Time,
-		Title:       i.Title,
-		Type:        i.Type,
-	}
-}
-
-func (i Item) toPollOpt() PollOpt {
-	return PollOpt{
-		By:    i.By,
-		ID:    i.ID,
-		Poll:  i.Poll,
-		Score: i.Score,
-		Text:  i.Text,
-		Time:  i.Time,
-		Type:  i.Type,
-	}
-}
-
-type Story struct {
-	By          string `json:"by"`
-	Descendants int    `json:"descendants"`
-	ID          int    `json:"id"`
-	Kids        []int  `json:"kids"`
-	Score       int    `json:"score"`
-	Time        int    `json:"time"`
-	Title       string `json:"title"`
-	Type        string `json:"type"`
-	URL         string `json:"url"`
-}
-
-type Stories []Story
-
 type Items []Item
-
-func (i Items) toStories() Stories {
-	var stories Stories
-
-	for _, item := range i {
-		stories = append(stories, item.toStory())
-	}
-	return stories
-}
-
-type Comment struct {
-	By     string `json:"by"`
-	ID     int    `json:"id"`
-	Kids   []int  `json:"kids"`
-	Parent int    `json:"parent"`
-	Text   string `json:"text"`
-	Time   int    `json:"time"`
-	Type   string `json:"type"`
-}
-
-type Ask struct {
-	By          string `json:"by"`
-	Descendants int    `json:"descendants"`
-	ID          int    `json:"id"`
-	Kids        []int  `json:"kids"`
-	Score       int    `json:"score"`
-	Text        string `json:"text"`
-	Time        int    `json:"time"`
-	Title       string `json:"title"`
-	Type        string `json:"type"`
-}
-
-type Job struct {
-	By    string `json:"by"`
-	ID    int    `json:"id"`
-	Score int    `json:"score"`
-	Text  string `json:"text"`
-	Time  int    `json:"time"`
-	Title string `json:"title"`
-	Type  string `json:"type"`
-	URL   string `json:"url"`
-}
-
-type Poll struct {
-	By          string `json:"by"`
-	Descendants int    `json:"descendants"`
-	ID          int    `json:"id"`
-	Kids        []int  `json:"kids"`
-	Parts       []int  `json:"parts"`
-	Score       int    `json:"score"`
-	Text        string `json:"text"`
-	Time        int    `json:"time"`
-	Title       string `json:"title"`
-	Type        string `json:"type"`
-}
-
-type PollOpt struct {
-	By    string `json:"by"`
-	ID    int    `json:"id"`
-	Poll  int    `json:"poll"`
-	Score int    `json:"score"`
-	Text  string `json:"text"`
-	Time  int    `json:"time"`
-	Type  string `json:"type"`
-}
 
 type Updates struct {
 	Items    []int    `json:"items"`
@@ -212,6 +53,11 @@ type User struct {
 	Submitted []int  `json:"submitted"`
 }
 
+// Get item
+func (c *Client) GetItem(ctx context.Context, id int) (Item, error) {
+	return c.apiV0GetItem(ctx, id)
+}
+
 // Get user
 func (hn *Client) GetUser(ctx context.Context, username string) (User, error) {
 	return hn.apiV0GetUser(ctx, username)
@@ -220,66 +66,6 @@ func (hn *Client) GetUser(ctx context.Context, username string) (User, error) {
 // Get current largest item id . You can walk backward from here to discover all items.
 func (hn *Client) GetMaxItem(ctx context.Context) (int, error) {
 	return hn.apiV0GetMaxItem(ctx)
-}
-
-// Get story
-func (hn *Client) GetStory(ctx context.Context, id int) (Story, error) {
-	item, err := hn.apiV0GetItem(ctx, id)
-	if err != nil {
-		return Story{}, err
-	}
-
-	return item.toStory(), nil
-}
-
-// Get comment
-func (hn *Client) GetComment(ctx context.Context, id int) (Comment, error) {
-	item, err := hn.apiV0GetItem(ctx, id)
-	if err != nil {
-		return Comment{}, err
-	}
-
-	return item.toComment(), nil
-}
-
-// Get ask
-func (hn *Client) GetAsk(ctx context.Context, id int) (Ask, error) {
-	item, err := hn.apiV0GetItem(ctx, id)
-	if err != nil {
-		return Ask{}, err
-	}
-
-	return item.toAsk(), nil
-}
-
-// Return Job
-func (hn *Client) GetJob(ctx context.Context, id int) (Job, error) {
-	item, err := hn.apiV0GetItem(ctx, id)
-	if err != nil {
-		return Job{}, err
-	}
-
-	return item.toJob(), nil
-}
-
-// Get poll
-func (hn Client) GetPoll(ctx context.Context, id int) (Poll, error) {
-	item, err := hn.apiV0GetItem(ctx, id)
-	if err != nil {
-		return Poll{}, err
-	}
-
-	return item.toPoll(), nil
-}
-
-// Get parts of poll
-func (hn *Client) GetPollOpt(ctx context.Context, id int) (PollOpt, error) {
-	item, err := hn.apiV0GetItem(ctx, id)
-	if err != nil {
-		return PollOpt{}, err
-	}
-
-	return item.toPollOpt(), nil
 }
 
 // Get up to 500 top stories. ID only
@@ -297,22 +83,22 @@ func (hn *Client) GetTopStories(ctx context.Context, number int) ([]int, error) 
 }
 
 // Get up to 500 top stories. With data
-func (hn *Client) GetTopStoriesWithData(ctx context.Context, number int) (Stories, error) {
+func (hn *Client) GetTopStoriesWithData(ctx context.Context, number int) (Items, error) {
 	if number < 1 || number > 500 {
-		return Stories{}, fmt.Errorf("accept number between 1 and 500 only")
+		return Items{}, fmt.Errorf("accept number between 1 and 500 only")
 	}
 
 	storyIDs, err := hn.apiV0GetTopStories(ctx)
 	if err != nil {
-		return Stories{}, err
+		return Items{}, err
 	}
 
 	items, err := hn.getItems(ctx, storyIDs, number)
 	if err != nil {
-		return Stories{}, err
+		return Items{}, err
 	}
 
-	return items.toStories(), err
+	return items, err
 }
 
 // Get up to 500 new stories. ID only
@@ -330,22 +116,22 @@ func (hn *Client) GetNewStories(ctx context.Context, number int) ([]int, error) 
 }
 
 // Get up to 500 new stories. With data
-func (hn *Client) GetNewStoriesWithData(ctx context.Context, number int) (Stories, error) {
+func (hn *Client) GetNewStoriesWithData(ctx context.Context, number int) (Items, error) {
 	if number < 1 || number > 500 {
-		return Stories{}, fmt.Errorf("accept number between 1 and 500 only")
+		return Items{}, fmt.Errorf("accept number between 1 and 500 only")
 	}
 
 	storyIDs, err := hn.apiV0GetNewStories(ctx)
 	if err != nil {
-		return Stories{}, err
+		return Items{}, err
 	}
 
 	items, err := hn.getItems(ctx, storyIDs, number)
 	if err != nil {
-		return Stories{}, err
+		return Items{}, err
 	}
 
-	return items.toStories(), err
+	return items, err
 }
 
 // Get up to 500 best stories. ID only
@@ -363,22 +149,22 @@ func (hn *Client) GetBestStories(ctx context.Context, number int) ([]int, error)
 }
 
 // Get up to 500 best stories. With data
-func (hn *Client) GetBestStoriesWithData(ctx context.Context, number int) (Stories, error) {
+func (hn *Client) GetBestStoriesWithData(ctx context.Context, number int) (Items, error) {
 	if number < 1 || number > 500 {
-		return Stories{}, fmt.Errorf("accept number between 1 and 500 only")
+		return Items{}, fmt.Errorf("accept number between 1 and 500 only")
 	}
 
 	storyIDs, err := hn.apiV0GetBestStories(ctx)
 	if err != nil {
-		return Stories{}, err
+		return Items{}, err
 	}
 
 	items, err := hn.getItems(ctx, storyIDs, number)
 	if err != nil {
-		return Stories{}, err
+		return Items{}, err
 	}
 
-	return items.toStories(), err
+	return items, err
 }
 
 func (hn *Client) getItems(ctx context.Context, ids []int, number int) (items Items, err error) {
@@ -418,9 +204,76 @@ func (hn *Client) getItems(ctx context.Context, ids []int, number int) (items It
 	return items, nil
 }
 
-// Get up to 200 ask stories
+// Get up to 200 ask stories. ID only
 func (hn *Client) GetAskStories(ctx context.Context) ([]int, error) {
 	return hn.apiV0GetAskStories(ctx)
+}
+
+// Get up to 200 ask stories. With data
+func (hn *Client) GetAskStoriesWithData(ctx context.Context, number int) (Items, error) {
+	if number < 1 || number > 200 {
+		return Items{}, fmt.Errorf("accept number between 1 and 200 only")
+	}
+
+	ids, err := hn.apiV0GetAskStories(ctx)
+	if err != nil {
+		return Items{}, err
+	}
+
+	items, err := hn.getItems(ctx, ids, number)
+	if err != nil {
+		return Items{}, err
+	}
+
+	return items, err
+}
+
+// Get up to 200 show stories. ID only
+func (hn *Client) GetShowStories(ctx context.Context) ([]int, error) {
+	return hn.apiV0GetShowStories(ctx)
+}
+
+// Get up to 200 show stories. With data
+func (hn *Client) GetShowStoriesWithData(ctx context.Context, number int) (Items, error) {
+	if number < 1 || number > 200 {
+		return Items{}, fmt.Errorf("accept number between 1 and 200 only")
+	}
+
+	ids, err := hn.apiV0GetShowStories(ctx)
+	if err != nil {
+		return Items{}, err
+	}
+
+	items, err := hn.getItems(ctx, ids, number)
+	if err != nil {
+		return Items{}, err
+	}
+
+	return items, err
+}
+
+// Get up to 200 job stories. ID only
+func (hn *Client) GetJobStories(ctx context.Context) ([]int, error) {
+	return hn.apiV0GetJobStories(ctx)
+}
+
+// Get up to 200 job stories. With data
+func (hn *Client) GetJobStoriesWithData(ctx context.Context, number int) (Items, error) {
+	if number < 1 || number > 200 {
+		return Items{}, fmt.Errorf("accept number between 1 and 200 only")
+	}
+
+	ids, err := hn.apiV0GetJobStories(ctx)
+	if err != nil {
+		return Items{}, err
+	}
+
+	items, err := hn.getItems(ctx, ids, number)
+	if err != nil {
+		return Items{}, err
+	}
+
+	return items, err
 }
 
 // Get item and profiles changes
@@ -527,8 +380,38 @@ func (hn *Client) apiV0GetAskStories(ctx context.Context) ([]int, error) {
 	}
 
 	return s, nil
-
 }
+
+func (hn *Client) apiV0GetShowStories(ctx context.Context) ([]int, error) {
+	s := []int{}
+	bytes, err := hn.apiCall(ctx, "/v0/showstories.json")
+	if err != nil {
+		return s, err
+	}
+
+	err = json.Unmarshal(bytes, &s)
+	if err != nil {
+		return nil, err
+	}
+
+	return s, nil
+}
+
+func (hn *Client) apiV0GetJobStories(ctx context.Context) ([]int, error) {
+	s := []int{}
+	bytes, err := hn.apiCall(ctx, "/v0/jobstories.json")
+	if err != nil {
+		return s, err
+	}
+
+	err = json.Unmarshal(bytes, &s)
+	if err != nil {
+		return nil, err
+	}
+
+	return s, nil
+}
+
 func (hn *Client) apiV0GetUpdates(ctx context.Context) (Updates, error) {
 	u := Updates{}
 	bytes, err := hn.apiCall(ctx, "/v0/updates.json")
